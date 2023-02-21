@@ -1,5 +1,4 @@
-from Utente import Utente
-import matplotlib.pyplot as plt
+from matplotlib import pyplot as plt
 from prettytable import PrettyTable
 
 
@@ -7,7 +6,7 @@ def main():
     utentes = parser("myheart.csv")
     opcao = 0
 
-    while(opcao != 9):
+    while (opcao != 9):
         print("\n--- BEM VINDO À RESOLUÇÂO DO TPC1 DE PL2023---")
         print("Foi feito o parser do ficheiro myheart.csv")
         print("Selecione uma das opções: ")
@@ -39,21 +38,21 @@ def main():
                 plt.show()
         elif opcao == 2:
             print("DISTRIBUIÇÃO DA DOENÇA POR ESCALÃO ETÁRIO")
-            dist = doencaPorEscaloes(utentes)
+            dist = doecaPorEscaloesEtarios(utentes)
             desenhaTableasEscaloesEtarios(dist)
 
             grafico = input("Pretende obter o gráfico? (Y/N)")
             if grafico == "Y":
                 count = list(dist.values())
                 plt.bar(range(len(dist)), count, width=0.5, align='center')
-                plt.xticks(range(len(dist)), [f"[{inf},{sup}]" for inf,sup in dist.keys()], fontsize=7)
+                plt.xticks(range(len(dist)), [f"[{inf},{sup}]" for inf, sup in dist.keys()], fontsize=7)
                 plt.yticks(fontsize=7)
                 plt.xlabel("Intervalos Etários")
                 plt.ylabel("Número de doentes")
                 plt.show()
         elif opcao == 3:
             print("DISTRIBUIÇÃO DA DOENÇA POR NÍVEIS DE COLESTROL")
-            dist = doencaPorColestrol(utentes)
+            dist = doecaPorNiveisColestrol(utentes)
             desenhaTableasColestrol(dist)
 
             grafico = input("Pretende obter o gráfico? (Y/N)")
@@ -68,96 +67,94 @@ def main():
         elif opcao == 9:
             break;
 
-
-
-def parser(filepath):
-    utentes = []
+def parser(path):
+    utentes = {}  # dicionário que vai ter como keys o nome da propriedade e value um dicionário com keys um id que é um acumulador e value o valor da propriedade
     linha = 2
-    with open(filepath, "r") as file:
-        next(file)  # passar a primeira linha que apenas possúi os nomes das colunas
+    id = 0
+    idade = {}
+    sexo = {}
+    tensao = {}
+    colestrol = {}
+    batimento = {}
+    temDoenca = {}
+
+    with open(path, 'r') as file:
+        next(file)
 
         for line in file:
             colunas = line.strip().split(',')
             if len(colunas) != 6: return print(f"A linha: {linha} não tem colunas suficientes!")
             else:
-                idade = colunas[0]
-                sexo = colunas[1]
-                tensao = colunas[2]
-                colestrol = colunas[3]
-                batimento = colunas[4]
-                temDoenca = colunas[5]
-                utente = Utente(idade, sexo,tensao, colestrol, batimento, temDoenca)
-                utentes.append(utente)
+                idade[id] = colunas[0]
+                sexo[id] = colunas[1]
+                tensao[id] = colunas[2]
+                colestrol[id] = colunas[3]
+                batimento[id] = colunas[4]
+                temDoenca[id] = colunas[5]
+                id += 1
                 linha += 1
 
-    return utentes
+    utentes["IDADE"] = idade
+    utentes["SEXO"] = sexo
+    utentes["TENSAO"] = tensao
+    utentes["COLESTROL"] = colestrol
+    utentes["BATIMENTO"] = batimento
+    utentes["TEMDOENCA"] = temDoenca
 
+    return utentes
 
 def doencaPorSexo(utentes):
     dist = {"Masculino" : 0,
             "Feminino" : 0}
-    for utente in utentes:
-        if utente.getTemDoenca() == "1":
-            if utente.getSexo() == "M":
-                dist["Masculino"] += 1
-            elif utente.getSexo() == "F":
-                dist["Feminino"] += 1
 
+    for id,valor in utentes["SEXO"].items():
+        if utentes["TEMDOENCA"][id] == "1":
+            if valor == "M":
+                dist["Masculino"] += 1
+            elif valor == "F":
+                dist["Feminino"] += 1
     return dist
 
-
-def doencaPorEscaloes(utentes):
-    novo, velho = maisNovoEmaisVelho(utentes)
-    limiteInf = (novo // 5) * 5
-    limiteSup = ((velho // 5) + 1) * 5
+def doecaPorEscaloesEtarios(utentes):
     dist = {}
-    for i in range(limiteInf, limiteSup, 5):
+    for i in range(30, 90, 5):
         dist[(i, i+4)] = 0
 
-    for utente in utentes:
-        if utente.getTemDoenca() == "1":
+    for id,valor in utentes["IDADE"].items():
+        if utentes["TEMDOENCA"][id] == "1":
             for inf,sup in dist:
-                if inf <= int(utente.getIdade()) <= sup:
+                if inf <= int(valor) <= sup:
                     dist[(inf,sup)] += 1
 
     return dist
 
 
-def maisNovoEmaisVelho(utentes):
-    tempNovo = int(utentes[0].getIdade())
-    tempVelho = int(utentes[0].getIdade())
-    for utente in utentes:
-        if int(utente.getIdade()) <= tempNovo:
-            tempNovo = int(utente.getIdade())
-        if int(utente.getIdade()) >= tempVelho:
-            tempVelho = int(utente.getIdade())
-
-    return tempNovo, tempVelho
-
-def doencaPorColestrol(utentes):
-    menor,maior = menorEmaiorColestrO(utentes)
-    limiteInf = (menor // 10) * 10
-    limiteSup = ((maior // 10) + 1) * 10
+def doecaPorNiveisColestrol(utentes):
     dist = {}
-    for i in range(limiteInf, limiteSup, 10):
+    inf,sup = menorEmaiorColestrol(utentes)
+    for i in range(inf, sup, 10):
         dist[(i, i+9)] = 0
 
-    for utente in utentes:
-        if utente.getTemDoenca() == "1":
-            for inf,sup in dist:
-                if inf <= int(utente.getColestrol()) <= sup:
-                    dist[(inf,sup)] += 1
+    for id,valor in utentes["COLESTROL"].items():
+        if utentes["TEMDOENCA"][id] == "1":
+            for inf1,sup1 in dist:
+                if inf1 <= int(valor) <= sup1:
+                    dist[(inf1,sup1)] += 1
+
     return dist
 
-def menorEmaiorColestrO(utentes):
-    tempInf = int(utentes[0].getColestrol())
-    tempSup = int(utentes[0].getColestrol())
-    for utente in utentes:
-        if int(utente.getColestrol()) <= tempInf:
-            tempInf = int(utente.getColestrol())
-        if int(utente.getColestrol()) >= tempSup:
-            tempSup = int(utente.getColestrol())
-    return tempInf,tempSup
+
+def menorEmaiorColestrol(utentes):
+    tempMenor = int(utentes["COLESTROL"][0])
+    tempMaior = int(utentes["COLESTROL"][0])
+
+    for id,valor in utentes["COLESTROL"].items():
+        if int(valor) <= tempMenor:
+            tempMenor = int(valor)
+        elif int(valor) >= tempMaior:
+            tempMaior = int(valor)
+
+    return tempMenor,tempMaior
 
 
 def desenhaTabelasSexo(dictionary):
@@ -179,4 +176,3 @@ def desenhaTableasColestrol(dictionary):
     print(table)
 
 main()
-
