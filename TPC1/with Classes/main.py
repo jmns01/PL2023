@@ -1,24 +1,72 @@
 from Utente import Utente
+import matplotlib.pyplot as plt
+from prettytable import PrettyTable
+
 
 def main():
-    r = parser("myheart.csv")
-    print(r[1].getIdade())
-    print(r[1].getSexo())
-    print(r[1].getTensao())
-    print(r[1].getColestrol())
-    print(r[1].getBatimento())
-    print(r[1].getTemDoenca())
+    utentes = parser("myheart.csv")
+    opcao = 0
 
-    dist = doencaPorSexo(r)
-    print(dist)
+    while(opcao != 9):
+        print("\n--- BEM VINDO À RESOLUÇÂO DO TPC1 DE PL2023---")
+        print("Foi feito o parser do ficheiro myheart.csv")
+        print("Selecione uma das opções: ")
+        print("1: Distribuição da doença por sexo ")
+        print("2: Distribuição da doença por escalão etária ")
+        print("3: Distribuição da doença por níveis de colestrol ")
+        print("9: Sair ")
+        print("Opção: ")
+        opcao = input()
+        try:
+            opcao = int(opcao)
+        except ValueError:
+            print("Introduza um valor válido!")
 
-    novo,velho = maisNovoEmaisVelho(r)
-    print(novo)
-    print(velho)
+        if opcao == 1:
+            print("DISTRIBUIÇÃO DA DOENÇA POR SEXO")
+            dist = doencaPorSexo(utentes)
+            desenhaTabelasSexo(dist)
 
-    dist = doencaPorEscaloes(r)
-    print(dist)
+            grafico = input("Pretende obter o gráfico? (Y/N)")
 
+            if grafico == "Y":
+                count = list(dist.values())
+                plt.bar(range(len(dist)), count, width=0.5, align='center')
+                plt.xticks(range(len(dist)), ["Masculino", "Feminino"], fontsize=7)
+                plt.yticks(fontsize=7)
+                plt.xlabel("Sexo")
+                plt.ylabel("Número de doentes")
+                plt.show()
+        elif opcao == 2:
+            print("DISTRIBUIÇÃO DA DOENÇA POR ESCALÃO ETÁRIO")
+            dist = doencaPorEscaloes(utentes)
+            desenhaTableasEscaloesEtarios(dist)
+
+            grafico = input("Pretende obter o gráfico? (Y/N)")
+            if grafico == "Y":
+                count = list(dist.values())
+                plt.bar(range(len(dist)), count, width=0.5, align='center')
+                plt.xticks(range(len(dist)), [f"[{inf},{sup}]" for inf,sup in dist.keys()], fontsize=7)
+                plt.yticks(fontsize=7)
+                plt.xlabel("Intervalos Etários")
+                plt.ylabel("Número de doentes")
+                plt.show()
+        elif opcao == 3:
+            print("DISTRIBUIÇÃO DA DOENÇA POR NÍVEIS DE COLESTROL")
+            dist = doencaPorColestrol(utentes)
+            desenhaTableasColestrol(dist)
+
+            grafico = input("Pretende obter o gráfico? (Y/N)")
+            if grafico == "Y":
+                count = list(dist.values())
+                plt.bar(range(len(dist)), count, width=0.5, align='center')
+                plt.xticks(range(len(dist)), [f"[{inf},{sup}]" for inf, sup in dist.keys()], fontsize=7)
+                plt.yticks(fontsize=7)
+                plt.xlabel("Intervalos de Colestrol")
+                plt.ylabel("Número de doentes")
+                plt.show()
+        elif opcao == 9:
+            break;
 
 
 
@@ -61,16 +109,15 @@ def doencaPorEscaloes(utentes):
     novo, velho = maisNovoEmaisVelho(utentes)
     limiteInf = (novo // 5) * 5
     limiteSup = ((velho // 5) + 1) * 5
-    print("VELHO")
-    print(limiteSup)
     dist = {}
     for i in range(limiteInf, limiteSup, 5):
-        dist[(i, i+4)] = set()
+        dist[(i, i+4)] = 0
 
     for utente in utentes:
         if utente.getTemDoenca() == "1":
-
-            dist
+            for inf,sup in dist:
+                if inf <= int(utente.getIdade()) <= sup:
+                    dist[(inf,sup)] += 1
 
     return dist
 
@@ -86,7 +133,49 @@ def maisNovoEmaisVelho(utentes):
 
     return tempNovo, tempVelho
 
+def doencaPorColestrol(utentes):
+    menor,maior = menorEmaiorColestrO(utentes)
+    limiteInf = (menor // 10) * 10
+    limiteSup = ((maior // 10) + 1) * 10
+    dist = {}
+    for i in range(limiteInf, limiteSup, 10):
+        dist[(i, i+9)] = 0
 
+    for utente in utentes:
+        if utente.getTemDoenca() == "1":
+            for inf,sup in dist:
+                if inf <= int(utente.getColestrol()) <= sup:
+                    dist[(inf,sup)] += 1
+    return dist
+
+def menorEmaiorColestrO(utentes):
+    tempInf = int(utentes[0].getColestrol())
+    tempSup = int(utentes[0].getColestrol())
+    for utente in utentes:
+        if int(utente.getColestrol()) <= tempInf:
+            tempInf = int(utente.getColestrol())
+        if int(utente.getColestrol()) >= tempSup:
+            tempSup = int(utente.getColestrol())
+    return tempInf,tempSup
+
+
+def desenhaTabelasSexo(dictionary):
+    table = PrettyTable()
+    table.field_names = ["Masculino", "Feminino"]
+    table.add_row([dictionary["Masculino"], dictionary["Feminino"]])
+    print(table)
+
+def desenhaTableasEscaloesEtarios(dictionary):
+    table = PrettyTable()
+    table.field_names = [f"[{inf},{sup}]" for inf, sup in dictionary.keys()]
+    table.add_row([f"{valor}" for valor in dictionary.values()])
+    print(table)
+
+def desenhaTableasColestrol(dictionary):
+    table = PrettyTable()
+    table.field_names = [f"[{inf},{sup}]" for inf, sup in dictionary.keys()]
+    table.add_row([f"{valor}" for valor in dictionary.values()])
+    print(table)
 
 main()
 
