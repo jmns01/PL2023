@@ -29,9 +29,4 @@ def tpc2():
         print("Programa Parado.")
         return digitos
 
-def main():
-    r = tpc2()
-    print(r)
-
-
-main()
+tpc2()
