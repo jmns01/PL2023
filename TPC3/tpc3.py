@@ -90,8 +90,6 @@ def frequenciaDeNomes(linhas_filtradas):
 
     return last5PrimeiroNome, last5UltimosNome
 
-import re
-
 
 def frequenciaDeRelacoes(data):
     relacoes = dict()
@@ -111,7 +109,7 @@ def frequenciaDeRelacoes(data):
 
 def converJson(linhas_filtradas):
     vintePrimeiros = {}
-    for i in range(0, 21):
+    for i in range(1, 21):
         vintePrimeiros[i] = linhas_filtradas[i]
 
     with open("output.json", "w") as outfile:
@@ -133,4 +131,6 @@ print(r4)
 
 r5 = frequenciaDeRelacoes(r)
 print(r5)
+
+converJson(r)
 
