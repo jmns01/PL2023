@@ -93,8 +93,8 @@ def frequenciaDeNomes(linhas_filtradas):
 import re
 
 
-def relacoes(data):
-    relationship = dict()
+def frequenciaDeRelacoes(data):
+    relacoes = dict()
     exp = re.compile(r"[a-zA-Z ]*,([a-zA-Z\s]*)\.[ ]*Proc\.\d+\.")
 
     for key in data:
@@ -102,11 +102,11 @@ def relacoes(data):
         matches = exp.finditer(obs)
 
         for match in matches:
-            if match.group(1) not in relationship:
-                relationship[match.group(1)] = 0
-            relationship[match.group(1)] += 1
+            if match.group(1) not in relacoes:
+                relacoes[match.group(1)] = 0
+            relacoes[match.group(1)] += 1
 
-    return relationship
+    return relacoes
 
 
 def converJson(linhas_filtradas):
@@ -131,6 +131,6 @@ print(r3)
 r4 = frequenciaDeNomes(r)
 print(r4)
 
-r5 = relacoes(r)
+r5 = frequenciaDeRelacoes(r)
 print(r5)
 
