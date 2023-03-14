@@ -38,9 +38,9 @@ def tpc4(first_line, lines):
             elif operacao == "media":
                 mymedia(first_line, lines, prefixo, min_val, max_val)
 
-            return [prefixo, min_val, max_val, operacao] # eleminar estes return dps (apenas para teste)
+            #return [prefixo, min_val, max_val, operacao] # eleminar estes return dps (apenas para teste)
 
-    return [first_line, lines]
+    #return [first_line, lines]
 
 def mylista(first_line, lines, prefixo, min_val):
     static_fields = []
