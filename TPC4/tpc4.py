@@ -3,7 +3,7 @@ import re
 import sys
 
 
-def parcer(ficheiro):
+def parser(ficheiro):
     text = []
     with open(ficheiro, "r") as file:
         first_line = file.readline().strip()
@@ -87,5 +87,5 @@ def tudo(type, first_line, lines, prefixo, min_val, max_val): # tipe é o tipo d
 if __name__ == "__main__":
     ficheiro = sys.argv[1]
 
-    fst, lines = parcer(ficheiro)
+    fst, lines = parser(ficheiro)
     tpc4(fst, lines)
